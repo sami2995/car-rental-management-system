@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,10 +11,12 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
         }
+
         .navbar {
             background-color: #333;
             padding: 15px 30px;
@@ -21,45 +24,54 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .navbar h1 {
             color: white;
             font-size: 24px;
         }
+
         .navbar-links a {
             color: white;
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 4px;
         }
+
         .navbar-links a:hover {
             background-color: #555;
         }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 30px;
         }
+
         .back-link {
             display: inline-block;
             color: #007bff;
             text-decoration: none;
             margin-bottom: 20px;
         }
+
         .back-link:hover {
             text-decoration: underline;
         }
+
         .car-detail {
             background: white;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         .car-image {
             width: 100%;
             height: 400px;
             object-fit: cover;
             background-color: #e9ecef;
         }
+
         .car-image-placeholder {
             width: 100%;
             height: 400px;
@@ -69,25 +81,30 @@
             justify-content: center;
             font-size: 100px;
         }
+
         .car-content {
             padding: 30px;
         }
+
         .car-content h2 {
             color: #333;
             margin-bottom: 20px;
             font-size: 28px;
         }
+
         .details-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-bottom: 30px;
         }
+
         .detail-item {
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 4px;
         }
+
         .detail-item label {
             display: block;
             color: #666;
@@ -95,11 +112,13 @@
             text-transform: uppercase;
             margin-bottom: 5px;
         }
+
         .detail-item span {
             font-size: 18px;
             font-weight: bold;
             color: #333;
         }
+
         .price-box {
             background-color: #007bff;
             color: white;
@@ -107,13 +126,16 @@
             border-radius: 8px;
             text-align: center;
         }
+
         .price-box .price {
             font-size: 48px;
             font-weight: bold;
         }
+
         .price-box span {
             font-size: 18px;
         }
+
         .availability {
             margin-top: 20px;
             padding: 15px;
@@ -121,43 +143,162 @@
             text-align: center;
             font-weight: bold;
         }
+
         .availability.available {
             background-color: #d4edda;
             color: #155724;
         }
+
         .availability.unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Reviews Section Styling */
+        .reviews-section {
+            margin-top: 40px;
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .reviews-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .review-card {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .review-header strong {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .stars {
+            color: #ffc107;
+            font-size: 18px;
+        }
+
+        .review-form {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .review-form .form-group {
+            margin-bottom: 15px;
+        }
+
+        .review-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .review-form select,
+        .review-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .review-form textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .review-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .review-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .messages {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .messages li {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .messages .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .messages .error {
             background-color: #f8d7da;
             color: #721c24;
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar">
         <h1>🚗 Car Rental System</h1>
         <div class="navbar-links">
-            <a href="{% url 'car_list_url' %}">Cars</a>
+            <a href="{% url 'car_list_url' %}">Home</a>
+            <a href="{% url 'car_list_url' %}#cars-section">Cars</a>
+            <a href="{% url 'car_list_url' %}#about">About</a>
+            <a href="{% url 'car_list_url' %}#contact">Contact</a>
             {% if user.is_authenticated %}
-                <a href="{% url 'logout_url' %}">Logout</a>
+            <a href="{% url 'dashboard_url' %}">Dashboard</a>
+            <a href="{% url 'logout_url' %}">Logout</a>
             {% else %}
-                <a href="{% url 'login_url' %}">Login</a>
-                <a href="{% url 'signup_url' %}">Sign Up</a>
+            <a href="{% url 'login_url' %}">Login</a>
+            <a href="{% url 'signup_url' %}">Sign Up</a>
             {% endif %}
         </div>
     </nav>
-    
+
     <div class="container">
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
         <a href="{% url 'car_list_url' %}" class="back-link">← Back to Cars</a>
-        
+
         <div class="car-detail">
             {% if car.image %}
             <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="car-image">
             {% else %}
             <div class="car-image-placeholder">🚗</div>
             {% endif %}
-            
+
             <div class="car-content">
                 <h2>{{ car.brand }} {{ car.model }}</h2>
-                
+
                 <div class="details-grid">
                     <div class="detail-item">
                         <label>Year</label>
@@ -176,14 +317,15 @@
                         <span>{{ car.plate_number }}</span>
                     </div>
                 </div>
-                
+
                 <div class="price-box">
                     <div class="price">ETB{{ car.daily_rate }}</div>
                     <span>per day</span>
                 </div>
-                
+
                 {# determine availability based on both the flag and active rentals #}
-                <div class="availability {% if car.available and not car.is_currently_rented %}available{% else %}unavailable{% endif %}">
+                <div
+                    class="availability {% if car.available and not car.is_currently_rented %}available{% else %}unavailable{% endif %}">
                     {% if car.available and not car.is_currently_rented %}
                     This car is available for rent
                     {% else %}
@@ -194,10 +336,65 @@
                 {% if user.is_authenticated and not user.is_staff and car.available and not car.is_currently_rented %}
                 <a href="{% url 'rent_car_url' car.id %}" class="btn">Rent Now</a>
                 {% elif not user.is_authenticated %}
-                <p style="margin-top:20px; text-align:center;">Please <a href="{% url 'login_url' %}">login</a> or <a href="{% url 'signup_url' %}">sign up</a> to rent this car.</p>
+                <p style="margin-top:20px; text-align:center;">Please <a href="{% url 'login_url' %}">login</a> or <a
+                        href="{% url 'signup_url' %}">sign up</a> to rent this car.</p>
                 {% endif %}
             </div>
         </div>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <h3>Customer Reviews</h3>
+
+            {% if reviews %}
+            {% for review in reviews %}
+            <div class="review-card">
+                <div class="review-header">
+                    <span><strong>{{ review.customer.name }}</strong> on {{ review.date_created|date:"M d, Y" }}</span>
+                    <span class="stars">
+                        {% if review.rating == 5 %}⭐⭐⭐⭐⭐{% endif %}
+                        {% if review.rating == 4 %}⭐⭐⭐⭐{% endif %}
+                        {% if review.rating == 3 %}⭐⭐⭐{% endif %}
+                        {% if review.rating == 2 %}⭐⭐{% endif %}
+                        {% if review.rating == 1 %}⭐{% endif %}
+                    </span>
+                </div>
+                <p>{{ review.comment }}</p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p>No reviews yet. Be the first to review this car!</p>
+            {% endif %}
+
+            <!-- Review Form -->
+            {% if user.is_authenticated and not user.is_staff %}
+            <div class="review-form">
+                <h4>Leave a Review</h4>
+                <form method="POST" action="{% url 'car_detail_url' car.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="rating">Rating (1-5)</label>
+                        <select name="rating" id="rating" required>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Good</option>
+                            <option value="3">3 - Average</option>
+                            <option value="2">2 - Poor</option>
+                            <option value="1">1 - Terrible</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">Your Comment</label>
+                        <textarea name="comment" id="comment" required
+                            placeholder="Share your experience with this car..."></textarea>
+                    </div>
+                    <button type="submit" class="review-btn">Submit Review</button>
+                </form>
+            </div>
+            {% elif not user.is_authenticated %}
+            <p style="margin-top: 20px;"><a href="{% url 'login_url' %}">Log in</a> to leave a review.</p>
+            {% endif %}
+        </div>
     </div>
 </body>
+
 </html>

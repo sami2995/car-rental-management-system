@@ -75,3 +75,17 @@ class Rental(models.Model):
 
     class Meta:
         ordering = ['-date_created']
+
+
+class Review(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='reviews')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    comment = models.TextField()
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review by {self.customer.name} for {self.car}"
+
+    class Meta:
+        ordering = ['-date_created']
