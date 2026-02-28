@@ -4,11 +4,23 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
+from django.db.models import Q
+from django.views.decorators.http import require_POST
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 from .models import Customer, Car, Rental
-from .forms import SignupForm, CustomerForm, CarForm, RentalForm, ReviewForm
+from .forms import SignupForm, CustomerForm, CarForm, RentalForm, ReviewForm, UserRentalRequestForm
+
+
+def sync_car_availability(car):
+    """Keep availability aligned with active visible rentals."""
+    has_active_rental = car.rentals.filter(status="active", visible=True).exists()
+    should_be_available = not has_active_rental
+    if car.available != should_be_available:
+        car.available = should_be_available
+        car.save(update_fields=["available"])
 
 
 # ===============================
@@ -32,14 +44,29 @@ def user_login(request):
 def user_signup(request):
     form = SignupForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = User.objects.create_user(
-            username=form.cleaned_data["username"],
-            email=form.cleaned_data["email"],
-            password=form.cleaned_data["password"],
-        )
-        Customer.objects.create(user=user)
-        login(request, user)
-        return redirect("car_list_url")
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=form.cleaned_data["username"],
+                    email=form.cleaned_data["email"],
+                    password=form.cleaned_data["password"],
+                )
+                Customer.objects.create(
+                    user=user,
+                    name=form.cleaned_data["name"],
+                    email=form.cleaned_data["email"],
+                    phone=form.cleaned_data["phone"],
+                    address=form.cleaned_data["address"],
+                    license_number=form.cleaned_data["license_number"],
+                )
+            login(request, user)
+            return redirect("car_list_url")
+        except IntegrityError:
+            messages.error(request, "Could not create account. Please verify your details and try again.")
+    elif request.method == "POST":
+        for error_list in form.errors.values():
+            for error in error_list:
+                messages.error(request, error)
     return render(request, "signup.html", {"form": form})
 
 
@@ -57,7 +84,10 @@ def dashboard(request):
     context = {
         "total_customers": Customer.objects.filter(visible=True).count(),
         "total_cars": Car.objects.filter(visible=True).count(),
+        "available_cars": Car.objects.filter(visible=True, available=True).count(),
+        "total_rentals": Rental.objects.filter(visible=True).count(),
         "active_rentals": Rental.objects.filter(status="active", visible=True).count(),
+        "recent_rentals": Rental.objects.filter(visible=True).select_related("customer", "car")[:10],
     }
     return render(request, "dashboard.html", context)
 
@@ -68,43 +98,105 @@ def dashboard(request):
 
 def car_list(request):
     cars = Car.objects.filter(visible=True)
-    return render(request, "car_list.html", {"cars": cars})
+    search = request.GET.get("search", "").strip()
+    # Backward compatibility for old query param name.
+    if not search:
+        search = request.GET.get("brand", "").strip()
+
+    category = request.GET.get("category", "").strip().lower()
+    # Backward compatibility for old query param name.
+    if not category:
+        category = request.GET.get("transmission", "").strip().lower()
+
+    max_price = request.GET.get("max_price", "").strip()
+
+    if search:
+        cars = cars.filter(
+            Q(brand__icontains=search)
+            | Q(model__icontains=search)
+            | Q(color__icontains=search)
+            | Q(plate_number__icontains=search)
+        )
+
+    if category in dict(Car.TRANSMISSION_CHOICES):
+        cars = cars.filter(transmission=category)
+
+    if max_price:
+        try:
+            max_price_value = Decimal(max_price)
+            if max_price_value >= 0:
+                cars = cars.filter(daily_rate__lte=max_price_value)
+            else:
+                max_price = ""
+        except (InvalidOperation, ValueError):
+            max_price = ""
+
+    return render(
+        request,
+        "car_list.html",
+        {
+            "cars": cars,
+            "current_search": search,
+            "current_category": category,
+            "current_max_price": max_price,
+        },
+    )
 
 
 def car_detail(request, car_id):
     car = get_object_or_404(Car, id=car_id, visible=True)
+    reviews = car.reviews.select_related("customer").all()
+    can_review = request.user.is_authenticated and hasattr(request.user, "customer")
     form = ReviewForm(request.POST or None)
 
-    if request.method == "POST" and request.user.is_authenticated:
+    if request.method == "POST" and can_review:
         if form.is_valid():
             review = form.save(commit=False)
             review.car = car
             review.customer = request.user.customer
             review.save()
             return redirect("car_detail_url", car_id=car.id)
+    elif request.method == "POST" and request.user.is_authenticated and not can_review:
+        messages.error(request, "Only customer accounts can submit reviews.")
 
-    return render(request, "car_detail.html", {"car": car, "form": form})
+    return render(
+        request,
+        "car_detail.html",
+        {
+            "car": car,
+            "reviews": reviews,
+            "form": form,
+            "can_review": can_review,
+        },
+    )
 
 
 @login_required
 def rent_car(request, car_id):
     car = get_object_or_404(Car, id=car_id, visible=True)
 
-    if not car.available:
+    if not car.available or car.is_currently_rented:
         messages.error(request, "Car not available")
         return redirect("car_detail_url", car_id=car_id)
 
-    form = RentalForm(request.POST or None)
+    form = UserRentalRequestForm(request.POST or None, car=car)
 
     if request.method == "POST" and form.is_valid():
-        rental = form.save(commit=False)
-        rental.customer = request.user.customer
-        rental.car = car
-        rental.status = "active"
-        rental.save()
+        start_date = form.cleaned_data["start_date"]
+        end_date = form.cleaned_data["end_date"]
+        rental_days = (end_date - start_date).days + 1
+        total_cost = car.daily_rate * rental_days
 
-        car.available = False
-        car.save()
+        Rental.objects.create(
+            customer=request.user.customer,
+            car=car,
+            start_date=start_date,
+            end_date=end_date,
+            total_cost=total_cost,
+            status="active",
+        )
+
+        sync_car_availability(car)
 
         return redirect("car_list_url")
 
@@ -128,20 +220,28 @@ def customer_admin(request):
 
 
 @staff_member_required
-def customer_edit(request, id):
-    customer = get_object_or_404(Customer, id=id)
+def customer_edit(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
     form = CustomerForm(request.POST or None, instance=customer)
 
     if request.method == "POST" and form.is_valid():
         form.save()
         return redirect("customer_admin_url")
 
-    return render(request, "customer_edit.html", {"form": form})
+    return render(
+        request,
+        "customer_edit.html",
+        {
+            "form": form,
+            "customer": customer,
+        },
+    )
 
 
 @staff_member_required
-def customer_delete(request, id):
-    customer = get_object_or_404(Customer, id=id)
+@require_POST
+def customer_delete(request, customer_id):
+    customer = get_object_or_404(Customer, id=customer_id)
     customer.visible = False
     customer.save()
     return redirect("customer_admin_url")
@@ -164,20 +264,28 @@ def car_admin(request):
 
 
 @staff_member_required
-def car_edit(request, id):
-    car = get_object_or_404(Car, id=id)
+def car_edit(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
     form = CarForm(request.POST or None, request.FILES or None, instance=car)
 
     if request.method == "POST" and form.is_valid():
         form.save()
         return redirect("car_admin_url")
 
-    return render(request, "car_edit.html", {"form": form})
+    return render(
+        request,
+        "car_edit.html",
+        {
+            "form": form,
+            "car": car,
+        },
+    )
 
 
 @staff_member_required
-def car_delete(request, id):
-    car = get_object_or_404(Car, id=id)
+@require_POST
+def car_delete(request, car_id):
+    car = get_object_or_404(Car, id=car_id)
     car.visible = False
     car.save()
     return redirect("car_admin_url")
@@ -191,34 +299,65 @@ def car_delete(request, id):
 def rental_admin(request):
     form = RentalForm(request.POST or None)
     rentals = Rental.objects.filter(visible=True)
+    customers = Customer.objects.filter(visible=True)
+    cars = Car.objects.filter(visible=True)
 
     if request.method == "POST" and form.is_valid():
         rental = form.save()
-        if rental.status == "active":
-            rental.car.available = False
-            rental.car.save()
+        sync_car_availability(rental.car)
         return redirect("rental_admin_url")
+    elif request.method == "POST":
+        for error_list in form.errors.values():
+            for error in error_list:
+                messages.error(request, error)
 
-    return render(request, "rental_admin.html", {"form": form, "rentals": rentals})
+    return render(
+        request,
+        "rental_admin.html",
+        {
+            "form": form,
+            "rentals": rentals,
+            "customers": customers,
+            "cars": cars,
+        },
+    )
 
 
 @staff_member_required
-def rental_edit(request, id):
-    rental = get_object_or_404(Rental, id=id)
+def rental_edit(request, rental_id):
+    rental = get_object_or_404(Rental, id=rental_id)
+    previous_car = rental.car
     form = RentalForm(request.POST or None, instance=rental)
 
     if request.method == "POST" and form.is_valid():
-        rental = form.save()
-        rental.car.available = rental.status != "active"
-        rental.car.save()
+        updated_rental = form.save()
+        sync_car_availability(updated_rental.car)
+        if previous_car.id != updated_rental.car_id:
+            sync_car_availability(previous_car)
         return redirect("rental_admin_url")
+    elif request.method == "POST":
+        for error_list in form.errors.values():
+            for error in error_list:
+                messages.error(request, error)
 
-    return render(request, "rental_edit.html", {"form": form})
+    return render(
+        request,
+        "rental_edit.html",
+        {
+            "form": form,
+            "rental": rental,
+            "customers": Customer.objects.filter(visible=True),
+            "cars": Car.objects.filter(visible=True),
+        },
+    )
 
 
 @staff_member_required
-def rental_delete(request, id):
-    rental = get_object_or_404(Rental, id=id)
+@require_POST
+def rental_delete(request, rental_id):
+    rental = get_object_or_404(Rental, id=rental_id)
+    car = rental.car
     rental.visible = False
     rental.save()
+    sync_car_availability(car)
     return redirect("rental_admin_url")

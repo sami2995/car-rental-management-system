@@ -110,7 +110,7 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" value="{{ form.username.value|default:'' }}" required>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
@@ -123,23 +123,23 @@
             <hr>
             <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" value="{{ form.name.value|default:'' }}" required>
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" value="{{ form.email.value|default:'' }}" required>
             </div>
             <div class="form-group">
                 <label for="phone">Phone</label>
-                <input type="text" id="phone" name="phone" required>
+                <input type="text" id="phone" name="phone" value="{{ form.phone.value|default:'' }}" required>
             </div>
             <div class="form-group">
                 <label for="address">Address</label>
-                <textarea id="address" name="address" rows="3" required></textarea>
+                <textarea id="address" name="address" rows="3" required>{{ form.address.value|default:'' }}</textarea>
             </div>
             <div class="form-group">
                 <label for="license_number">License Number</label>
-                <input type="text" id="license_number" name="license_number" required>
+                <input type="text" id="license_number" name="license_number" value="{{ form.license_number.value|default:'' }}" required>
             </div>
             <button type="submit">Sign Up</button>
         </form>

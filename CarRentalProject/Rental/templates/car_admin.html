@@ -136,6 +136,10 @@
             display: flex;
             gap: 10px;
         }
+        .inline-form {
+            display: inline;
+            margin: 0;
+        }
         .car-thumb {
             width: 60px;
             height: 40px;
@@ -289,7 +293,10 @@
                         </td>
                         <td class="actions">
                             <a href="{% url 'car_edit_url' car.id %}" class="btn btn-warning">Edit</a>
-                            <a href="{% url 'car_delete_url' car.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this car?')">Delete</a>
+                            <form method="POST" action="{% url 'car_delete_url' car.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this car?')">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
                         </td>
                     </tr>
                     {% empty %}

@@ -339,16 +339,17 @@
         <div class="filter-section">
             <form method="GET" action="{% url 'car_list_url' %}#cars-section" class="filter-form">
                 <div class="form-group">
-                    <label for="brand">Brand</label>
-                    <input type="text" id="brand" name="brand" value="{{ current_brand }}" placeholder="e.g. Toyota">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" name="search" value="{{ current_search }}"
+                        placeholder="Brand, model, color, or plate no.">
                 </div>
                 <div class="form-group">
-                    <label for="transmission">Transmission</label>
-                    <select id="transmission" name="transmission">
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
                         <option value="">All</option>
-                        <option value="automatic" {% if current_transmission == 'automatic' %}selected{% endif %}>
+                        <option value="automatic" {% if current_category == 'automatic' %}selected{% endif %}>
                             Automatic</option>
-                        <option value="manual" {% if current_transmission == 'manual' %}selected{% endif %}>Manual
+                        <option value="manual" {% if current_category == 'manual' %}selected{% endif %}>Manual
                         </option>
                     </select>
                 </div>
