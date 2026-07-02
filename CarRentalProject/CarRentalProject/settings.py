@@ -61,10 +61,11 @@ WSGI_APPLICATION = 'CarRentalProject.wsgi.application'
 
 # Database
 import dj_database_url
+import os
 
 DATABASES = {
     "default": dj_database_url.config(
-        default="sqlite:///db.sqlite3",
+        default=None,  # 👈 IMPORTANT: no fallback to SQLite in production
         conn_max_age=600,
     )
 }
@@ -96,12 +97,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
-
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
 
 STORAGES = {
     "staticfiles": {
