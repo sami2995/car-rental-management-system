@@ -1,169 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Customer - Car Rental System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            background-color: #333;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 {
-            color: white;
-            font-size: 24px;
-        }
-        .navbar-links {
-            display: flex;
-            gap: 20px;
-        }
-        .navbar-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }
-        .navbar-links a:hover {
-            background-color: #555;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        .back-link {
-            display: inline-block;
-            color: #007bff;
-            text-decoration: none;
-            margin-bottom: 20px;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-            margin-left: 10px;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <h1>🚗 Car Rental System</h1>
-        <div class="navbar-links">
-            <a href="{% url 'dashboard_url' %}">Dashboard</a>
-            <a href="{% url 'car_list_url' %}">Cars</a>
-            <a href="{% url 'customer_admin_url' %}">Customers</a>
-            <a href="{% url 'car_admin_url' %}">Manage Cars</a>
-            <a href="{% url 'rental_admin_url' %}">Rentals</a>
-            <a href="{% url 'logout_url' %}">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="container">
-        <a href="{% url 'customer_admin_url' %}" class="back-link">← Back to Customers</a>
+{% extends "base.html" %}
+
+{% block title %}Edit Customer Profile - Car Rental System{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 32px;">
+    <!-- Back Navigation Link -->
+    <div style="margin-bottom: 24px;">
+        <a href="{% url 'customer_admin_url' %}" style="color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+            ← Back to Customer Manager
+        </a>
+    </div>
+
+    <div class="card" style="max-width: 680px; margin: 0 auto; box-shadow: var(--shadow-lg);">
+        <h2 class="card-title" style="border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px;">
+            ✏️ Edit Customer Profile Details
+        </h2>
         
-        <h2>Edit Customer</h2>
-        
-        <div class="card">
-            <form method="POST">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" value="{{ customer.name }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" value="{{ customer.email }}" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="text" id="phone" name="phone" value="{{ customer.phone }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="license_number">License Number</label>
-                        <input type="text" id="license_number" name="license_number" value="{{ customer.license_number }}" required>
-                    </div>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_name">Full Name</label>
+                    <input type="text" name="name" value="{{ form.name.value|default:'' }}" id="id_name" required>
+                    {% for error in form.name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="form-group">
-                    <label for="address">Address</label>
-                    <textarea id="address" name="address" required>{{ customer.address }}</textarea>
+                    <label for="id_email">Email Address</label>
+                    <input type="email" name="email" value="{{ form.email.value|default:'' }}" id="id_email" required>
+                    {% for error in form.email.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                <button type="submit" class="btn btn-primary">Update Customer</button>
-                <a href="{% url 'customer_admin_url' %}" class="btn btn-secondary">Cancel</a>
-            </form>
-        </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_phone">Phone Number</label>
+                    <input type="text" name="phone" value="{{ form.phone.value|default:'' }}" id="id_phone" required>
+                    {% for error in form.phone.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="id_license_number">Driving License Number</label>
+                    <input type="text" name="license_number" value="{{ form.license_number.value|default:'' }}" id="id_license_number" required>
+                    {% for error in form.license_number.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_address">Residential Address</label>
+                <textarea name="address" id="id_address" rows="3" required>{{ form.address.value|default:'' }}</textarea>
+                {% for error in form.address.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <a href="{% url 'customer_admin_url' %}" class="btn btn-secondary" style="min-width: 100px;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="min-width: 140px;">Save Profile</button>
+            </div>
+        </form>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

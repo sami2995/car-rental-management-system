@@ -49,6 +49,26 @@ class Car(models.Model):
         # use related_name 'rentals' defined on Rental.car
         return self.rentals.filter(status='active', visible=True).exists()
 
+    @property
+    def average_rating(self):
+        """Returns the average rating of reviews for this car."""
+        reviews = self.reviews.all()
+        if not reviews.exists():
+            return 0.0
+        return round(sum(r.rating for r in reviews) / reviews.count(), 1)
+
+    @property
+    def star_range(self):
+        """Returns a list of range for full stars."""
+        avg = round(self.average_rating)
+        return list(range(avg))
+
+    @property
+    def empty_star_range(self):
+        """Returns a list of range for empty stars."""
+        avg = round(self.average_rating)
+        return list(range(5 - avg))
+
     class Meta:
         ordering = ['brand', 'model']
 

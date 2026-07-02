@@ -3,11 +3,6 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from .models import Customer, Car, Rental, Review
 
-
-# ===============================
-# AUTH FORMS
-# ===============================
-
 class SignupForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     password2 = forms.CharField(widget=forms.PasswordInput)
@@ -38,10 +33,6 @@ class SignupForm(forms.ModelForm):
             raise forms.ValidationError("Passwords do not match")
         return cleaned
 
-
-# ===============================
-# MODEL FORMS
-# ===============================
 
 class CustomerForm(forms.ModelForm):
     class Meta:

@@ -1,66 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rent {{ car.brand }} {{ car.model }} - Car Rental System</title>
-    <style>
-        * {margin:0;padding:0;box-sizing:border-box;}
-        body {font-family:Arial,sans-serif;background:#f5f5f5;}
-        .container {max-width:600px;margin:50px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-        h1,h2 {text-align:center;color:#333;}
-        .form-group {margin-bottom:20px;}
-        label{display:block;margin-bottom:5px;color:#555;font-weight:bold;}
-        input[type=date] {width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;}
-        .price-info {text-align:center;margin-bottom:20px;font-size:18px;color:#007bff;}
-        button {width:100%;padding:12px;background:#007bff;color:#fff;border:none;border-radius:4px;font-size:16px;cursor:pointer;}
-        button:hover{background:#0056b3;}
-        .messages{margin-bottom:20px;}
-        .message{padding:10px;border-radius:4px;margin-bottom:10px;}
-        .message.error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;}
-        .message.success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;}
-        .field-error{color:#dc3545;font-size:13px;margin-top:5px;}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Rent {{ car.brand }} {{ car.model }}</h1>
-        <div class="price-info">Rate: ETB {{ car.daily_rate }} / day</div>
+{% extends "base.html" %}
 
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
+{% block title %}Rent {{ car.brand }} {{ car.model }} - Car Rental System{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="padding-top: 50px; padding-bottom: 50px;">
+    <div class="auth-card" style="max-width: 540px;">
+        <div class="auth-header" style="margin-bottom: 24px;">
+            <div class="auth-logo">📝</div>
+            <h1 style="font-size: 24px; font-weight: 800;">Rental Request</h1>
+            <p>Complete booking for <strong>{{ car.brand }} {{ car.model }}</strong></p>
         </div>
-        {% endif %}
+
+        <!-- Car Info Summary -->
+        <div style="background-color: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
+            {% if car.image %}
+                <img src="{{ car.image.url }}" alt="{{ car.brand }}" style="width: 80px; height: 50px; object-fit: cover; border-radius: var(--radius-sm);">
+            {% else %}
+                <div style="width: 80px; height: 50px; display: flex; align-items: center; justify-content: center; background-color: #e2e8f0; border-radius: var(--radius-sm); font-size: 20px;">🚗</div>
+            {% endif %}
+            <div>
+                <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary);">{{ car.brand }} {{ car.model }}</h4>
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary);">Daily Rate: ETB <span id="daily-rate-val">{{ car.daily_rate }}</span></div>
+            </div>
+        </div>
 
         {% if form.non_field_errors %}
-        <div class="messages">
-            {% for error in form.non_field_errors %}
-            <div class="message error">{{ error }}</div>
-            {% endfor %}
-        </div>
+            <div style="background-color: var(--error-light); color: var(--error-text); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: var(--radius-md); padding: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 600;">
+                {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
         {% endif %}
 
         <form method="POST">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="start_date">Start Date</label>
-                <input type="date" id="start_date" name="start_date" value="{{ form.start_date.value|default:'' }}" required>
-                {% for error in form.start_date.errors %}
-                <div class="field-error">{{ error }}</div>
-                {% endfor %}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ form.start_date.value|default:'' }}" required>
+                    {% for error in form.start_date.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" id="end_date" name="end_date" value="{{ form.end_date.value|default:'' }}" required>
+                    {% for error in form.end_date.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="form-group">
-                <label for="end_date">End Date</label>
-                <input type="date" id="end_date" name="end_date" value="{{ form.end_date.value|default:'' }}" required>
-                {% for error in form.end_date.errors %}
-                <div class="field-error">{{ error }}</div>
-                {% endfor %}
+
+            <!-- Dynamic Price Summary Box -->
+            <div class="price-calculation-card" id="pricing-summary-card" style="display: none;">
+                <h4 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Booking Summary</h4>
+                <div class="price-calc-row">
+                    <span>Daily Rental Rate:</span>
+                    <strong>ETB {{ car.daily_rate }}</strong>
+                </div>
+                <div class="price-calc-row">
+                    <span>Rental Duration:</span>
+                    <strong><span id="calc-days">0</span> days</strong>
+                </div>
+                <div class="price-calc-row total">
+                    <span>Estimated Total Cost:</span>
+                    <span>ETB <span id="calc-total">0.00</span></span>
+                </div>
             </div>
-            <button type="submit">Submit Rental Request</button>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px;">Confirm and Request Rental</button>
         </form>
+
+        <div style="text-align: center; margin-top: 16px;">
+            <a href="{% url 'car_detail_url' car.id %}" style="color: var(--text-secondary); font-size: 14px; font-weight: 600; text-decoration: none;">Cancel Booking</a>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+        const dailyRate = parseFloat(document.getElementById('daily-rate-val').innerText);
+        const summaryCard = document.getElementById('pricing-summary-card');
+        const calcDays = document.getElementById('calc-days');
+        const calcTotal = document.getElementById('calc-total');
+
+        // Set minimum date to today's date local
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const formattedToday = `${yyyy}-${mm}-${dd}`;
+        startDateInput.setAttribute('min', formattedToday);
+        endDateInput.setAttribute('min', formattedToday);
+
+        function updatePrice() {
+            const startVal = startDateInput.value;
+            const endVal = endDateInput.value;
+
+            if (startVal && endVal) {
+                const startDate = new Date(startVal);
+                const endDate = new Date(endVal);
+
+                // Zero out hours to ensure accuracy
+                startDate.setHours(0,0,0,0);
+                endDate.setHours(0,0,0,0);
+
+                if (endDate >= startDate) {
+                    const diffTime = Math.abs(endDate - startDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // inclusive
+                    
+                    const totalCost = diffDays * dailyRate;
+
+                    calcDays.innerText = diffDays;
+                    calcTotal.innerText = totalCost.toFixed(2);
+                    summaryCard.style.display = 'block';
+                } else {
+                    summaryCard.style.display = 'none';
+                }
+            } else {
+                summaryCard.style.display = 'none';
+            }
+        }
+
+        startDateInput.addEventListener('change', () => {
+            // enforce end date min is at least start date
+            endDateInput.setAttribute('min', startDateInput.value);
+            updatePrice();
+        });
+        
+        endDateInput.addEventListener('change', updatePrice);
+        
+        // Initial run
+        updatePrice();
+    });
+</script>
+{% endblock %}

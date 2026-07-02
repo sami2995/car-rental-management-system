@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Affordable and reliable car rental service. Choose from automatic and manual vehicles for your journey.">
+    <title>{% block title %}Car Rental System{% endblock %}</title>
+    <!-- CSS stylesheet link -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast {% if message.tags %}{{ message.tags }}{% endif %}">
+                    <div class="toast-content">
+                        {% if message.tags == 'success' %}
+                            ✅
+                        {% elif message.tags == 'error' %}
+                            ❌
+                        {% else %}
+                            ℹ️
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Sticky Navigation Header -->
+    <nav class="navbar">
+        <a href="{% url 'car_list_url' %}" class="navbar-brand">
+            🚗 Car Rental
+        </a>
+        <div class="navbar-links">
+            <a href="{% url 'car_list_url' %}" class="{% if request.resolver_match.url_name == 'car_list_url' and not '#' in request.path %}active{% endif %}">Home</a>
+            <a href="{% url 'car_list_url' %}#cars-section">Explore Fleet</a>
+            
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <a href="{% url 'dashboard_url' %}" class="{% if request.resolver_match.url_name == 'dashboard_url' %}active{% endif %}">Admin Dashboard</a>
+                    <a href="{% url 'car_admin_url' %}" class="{% if request.resolver_match.url_name == 'car_admin_url' or request.resolver_match.url_name == 'car_edit_url' %}active{% endif %}">Manage Cars</a>
+                    <a href="{% url 'customer_admin_url' %}" class="{% if request.resolver_match.url_name == 'customer_admin_url' or request.resolver_match.url_name == 'customer_edit_url' %}active{% endif %}">Customers</a>
+                    <a href="{% url 'rental_admin_url' %}" class="{% if request.resolver_match.url_name == 'rental_admin_url' or request.resolver_match.url_name == 'rental_edit_url' %}active{% endif %}">Rentals Ledger</a>
+                {% else %}
+                    <a href="{% url 'customer_profile_url' %}" class="{% if request.resolver_match.url_name == 'customer_profile_url' %}active{% endif %}">My Bookings & Profile</a>
+                {% endif %}
+                <div class="navbar-user">
+                    <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary);">👤 {{ user.username }}</span>
+                    <a href="{% url 'logout_url' %}" style="font-size: 13px; font-weight: 700; color: var(--error-text); padding: 6px 12px;">Logout</a>
+                </div>
+            {% else %}
+                <a href="{% url 'login_url' %}" class="{% if request.resolver_match.url_name == 'login_url' %}active{% endif %}">Login</a>
+                <a href="{% url 'signup_url' %}" class="btn btn-primary" style="color: white; padding: 8px 16px;">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main style="flex: 1;">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#">About Us</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Support Contact</a>
+            </div>
+            <p>&copy; {% now "Y" %} Car Rental System. All rights reserved. Crafted with care.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for toast notifications auto-dismiss -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach((toast) => {
+                // Auto dismiss toast after 4 seconds
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px) scale(0.95)';
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 300);
+                }, 4000);
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

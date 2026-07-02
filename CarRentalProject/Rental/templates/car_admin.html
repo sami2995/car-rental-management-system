@@ -1,312 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Cars - Car Rental System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            background-color: #333;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 {
-            color: white;
-            font-size: 24px;
-        }
-        .navbar-links {
-            display: flex;
-            gap: 20px;
-        }
-        .navbar-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }
-        .navbar-links a:hover {
-            background-color: #555;
-        }
-        .navbar-links a.active {
-            background-color: #007bff;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .card h3 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .checkbox-group input {
-            width: auto;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            color: #333;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        .inline-form {
-            display: inline;
-            margin: 0;
-        }
-        .car-thumb {
-            width: 60px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .status-badge.available {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-badge.unavailable {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .messages {
-            margin-bottom: 20px;
-        }
-        .message {
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <h1>🚗 Car Rental System</h1>
-        <div class="navbar-links">
-            <a href="{% url 'dashboard_url' %}">Dashboard</a>
-            <a href="{% url 'car_list_url' %}">Cars</a>
-            <a href="{% url 'customer_admin_url' %}">Customers</a>
-            <a href="{% url 'car_admin_url' %}" class="active">Manage Cars</a>
-            <a href="{% url 'rental_admin_url' %}">Rentals</a>
-            <a href="{% url 'logout_url' %}">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="container">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <h2>Manage Cars</h2>
-        
-        <!-- Add Car Form -->
-        <div class="card">
-            <h3>Add New Car</h3>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="brand">Brand</label>
-                        <input type="text" id="brand" name="brand" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="model">Model</label>
-                        <input type="text" id="model" name="model" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="year">Year</label>
-                        <input type="number" id="year" name="year" min="1900" max="2030" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="color">Color</label>
-                        <input type="text" id="color" name="color" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="plate_number">Plate Number</label>
-                        <input type="text" id="plate_number" name="plate_number" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="transmission">Transmission</label>
-                        <select id="transmission" name="transmission" required>
-                            <option value="automatic">Automatic</option>
-                            <option value="manual">Manual</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="daily_rate">Daily Rate ($)</label>
-                        <input type="number" id="daily_rate" name="daily_rate" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="image">Car Image</label>
-                        <input type="file" id="image" name="image" accept="image/*">
-                    </div>
-                    <div class="form-group">
-                        <label>Availability</label>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="available" name="available" checked>
-                            <label for="available" style="margin-bottom: 0; font-weight: normal;">Available for rent</label>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Car</button>
-            </form>
-        </div>
-        
-        <!-- Car List -->
-        <div class="card">
-            <h3>All Cars</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Brand</th>
-                        <th>Model</th>
-                        <th>Year</th>
-                        <th>Plate #</th>
-                        <th>Daily Rate</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for car in cars %}
-                    <tr>
-                        <td>
-                            {% if car.image %}
-                            <img src="{{ car.image.url }}" alt="{{ car.brand }}" class="car-thumb">
-                            {% else %}
-                            <span style="color: #999;">No image</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ car.brand }}</td>
-                        <td>{{ car.model }}</td>
-                        <td>{{ car.year }}</td>
-                        <td>{{ car.plate_number }}</td>
-                        <td>${{ car.daily_rate }}</td>
-                        <td>
-                            <span class="status-badge {% if car.available %}available{% else %}unavailable{% endif %}">
-                                {% if car.available %}Available{% else %}Unavailable{% endif %}
-                            </span>
-                        </td>
-                        <td class="actions">
-                            <a href="{% url 'car_edit_url' car.id %}" class="btn btn-warning">Edit</a>
-                            <form method="POST" action="{% url 'car_delete_url' car.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this car?')">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" style="text-align: center; color: #666;">No cars yet</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+{% extends "base.html" %}
+
+{% block title %}Manage Cars - Car Rental System{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 32px;">
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-weight: 800; font-size: 32px;">Manage Vehicles Fleet</h1>
+        <p style="color: var(--text-secondary);">Register new vehicles, update existing inventory details, or remove cars from the system.</p>
     </div>
-</body>
-</html>
+
+    <!-- Create Car Form -->
+    <div class="card" style="box-shadow: var(--shadow-md); margin-bottom: 40px;">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            ➕ Register New Vehicle
+        </h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="brand">Brand</label>
+                    <input type="text" id="brand" name="brand" placeholder="e.g. Toyota" required>
+                </div>
+                <div class="form-group">
+                    <label for="model">Model</label>
+                    <input type="text" id="model" name="model" placeholder="e.g. Corolla" required>
+                </div>
+                <div class="form-group">
+                    <label for="year">Manufacture Year</label>
+                    <input type="number" id="year" name="year" min="1990" max="2030" placeholder="e.g. 2022" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="color">Color</label>
+                    <input type="text" id="color" name="color" placeholder="e.g. Silver" required>
+                </div>
+                <div class="form-group">
+                    <label for="plate_number">License Plate Number</label>
+                    <input type="text" id="plate_number" name="plate_number" placeholder="e.g. AA-3-A12345" required>
+                </div>
+                <div class="form-group">
+                    <label for="transmission">Transmission Type</label>
+                    <select id="transmission" name="transmission" required>
+                        <option value="automatic">Automatic</option>
+                        <option value="manual">Manual</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="daily_rate">Daily Rental Rate (ETB)</label>
+                    <input type="number" id="daily_rate" name="daily_rate" step="0.01" min="0" placeholder="e.g. 1500" required>
+                </div>
+                <div class="form-group">
+                    <label for="image">Car Gallery Image</label>
+                    <input type="file" id="image" name="image" accept="image/*" style="padding: 8px 12px;">
+                </div>
+                <div class="form-group">
+                    <label>Fleet Availability Status</label>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+                        <input type="checkbox" id="available" name="available" checked style="width: auto; height: auto; margin-right: 6px; cursor: pointer;">
+                        <label for="available" style="margin-bottom: 0; font-weight: 500; cursor: pointer; text-transform: none; font-size: 14px;">Mark available for booking immediately</label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                <button type="submit" class="btn btn-primary" style="min-width: 180px;">Add Vehicle to Fleet</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Inventory Fleet List -->
+    <div class="card" style="box-shadow: var(--shadow-md);">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px;">Current Inventory ({{ cars|length }} Cars)</h3>
+        
+        {% if cars %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Car Specification</th>
+                            <th>Plate #</th>
+                            <th>Transmission</th>
+                            <th>Daily Rate</th>
+                            <th>Booking Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for car in cars %}
+                            <tr>
+                                <td>
+                                    {% if car.image %}
+                                        <img src="{{ car.image.url }}" alt="{{ car.brand }}" style="width: 70px; height: 45px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                                    {% else %}
+                                        <span style="font-size: 24px;">🚗</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="font-weight: 700; color: var(--text-primary);">{{ car.brand }} {{ car.model }}</div>
+                                    <div style="font-size: 12px; color: var(--text-muted);">Manufacture Year: {{ car.year }} | Color: {{ car.color }}</div>
+                                </td>
+                                <td style="font-family: monospace; font-weight: 600; font-size: 14px;">{{ car.plate_number }}</td>
+                                <td>
+                                    <span style="font-size: 13px; font-weight: 600; text-transform: capitalize;">⚙️ {{ car.transmission }}</span>
+                                </td>
+                                <td style="font-weight: 700; color: var(--primary);">ETB {{ car.daily_rate }}</td>
+                                <td>
+                                    {% if car.available and not car.is_currently_rented %}
+                                        <span class="badge badge-available">Available</span>
+                                    {% else %}
+                                        <span class="badge badge-unavailable">Unavailable / Booked</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url 'car_edit_url' car.id %}" class="btn btn-warning" style="padding: 6px 12px; font-size: 12px;">Edit</a>
+                                        <form method="POST" action="{% url 'car_delete_url' car.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this car?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <p>No cars registered in the fleet database.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

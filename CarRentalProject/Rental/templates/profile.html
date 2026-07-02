@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile & Bookings - Car Rental System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-weight: 800; font-size: 32px;">My Bookings & Account</h1>
+        <p style="color: var(--text-secondary);">Manage your rental reservations and account settings below.</p>
+    </div>
+
+    <div class="tabs-navigation">
+        <button class="tab-btn active" onclick="switchTab('active-bookings', this)">Active & Upcoming</button>
+        <button class="tab-btn" onclick="switchTab('past-bookings', this)">Past Rentals</button>
+        <button class="tab-btn" onclick="switchTab('cancelled-bookings', this)">Cancelled</button>
+        <button class="tab-btn" onclick="switchTab('account-settings', this)">Profile Details</button>
+    </div>
+
+    <!-- Active & Upcoming Rentals Tab -->
+    <div id="active-bookings" class="tab-content active">
+        <div class="card">
+            <h2 class="card-title">Active & Upcoming Reservations</h2>
+            {% if active_or_upcoming %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Car Details</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Total Cost</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rental in active_or_upcoming %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700; color: var(--text-primary);">{{ rental.car.brand }} {{ rental.car.model }}</div>
+                                        <div style="font-size: 12px; color: var(--text-muted);">{{ rental.car.year }} | {{ rental.car.plate_number }}</div>
+                                    </td>
+                                    <td>{{ rental.start_date }}</td>
+                                    <td>{{ rental.end_date }}</td>
+                                    <td style="font-weight: 700; color: var(--primary);">ETB {{ rental.total_cost }}</td>
+                                    <td>
+                                        <span class="badge {% if rental.status == 'active' %}badge-active{% else %}badge-pending{% endif %}">
+                                            {{ rental.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{% url 'cancel_rental_url' rental.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this booking?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Cancel Booking</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <p style="font-size: 16px; margin-bottom: 16px;">You don't have any active or upcoming reservations.</p>
+                    <a href="{% url 'car_list_url' %}#cars-section" class="btn btn-primary">Browse Available Cars</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Past Rentals Tab -->
+    <div id="past-bookings" class="tab-content">
+        <div class="card">
+            <h2 class="card-title">Past Rentals History</h2>
+            {% if past_rentals %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Car Details</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Total Cost</th>
+                                <th>Status</th>
+                                <th>Review</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rental in past_rentals %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700;">{{ rental.car.brand }} {{ rental.car.model }}</div>
+                                        <div style="font-size: 12px; color: var(--text-muted);">{{ rental.car.year }}</div>
+                                    </td>
+                                    <td>{{ rental.start_date }}</td>
+                                    <td>{{ rental.end_date }}</td>
+                                    <td style="font-weight: 700; color: var(--primary);">ETB {{ rental.total_cost }}</td>
+                                    <td>
+                                        <span class="badge badge-completed">
+                                            {{ rental.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'car_detail_url' rental.car.id %}#review" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">Leave Review</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <p>No past rentals recorded yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Cancelled Tab -->
+    <div id="cancelled-bookings" class="tab-content">
+        <div class="card">
+            <h2 class="card-title">Cancelled Bookings</h2>
+            {% if cancelled_rentals %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Car Details</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Total Cost</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rental in cancelled_rentals %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 700;">{{ rental.car.brand }} {{ rental.car.model }}</div>
+                                        <div style="font-size: 12px; color: var(--text-muted);">{{ rental.car.year }}</div>
+                                    </td>
+                                    <td>{{ rental.start_date }}</td>
+                                    <td>{{ rental.end_date }}</td>
+                                    <td style="font-weight: 700; color: var(--text-muted);">ETB {{ rental.total_cost }}</td>
+                                    <td>
+                                        <span class="badge badge-cancelled">
+                                            {{ rental.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <p>No cancelled rentals.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Account Settings Tab -->
+    <div id="account-settings" class="tab-content">
+        <div class="card" style="max-width: 680px;">
+            <h2 class="card-title">Update Profile Details</h2>
+            <form method="POST" action="{% url 'customer_profile_url' %}">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_name">Full Name</label>
+                        <input type="text" name="name" value="{{ form.name.value|default:'' }}" id="id_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        <input type="email" name="email" value="{{ form.email.value|default:'' }}" id="id_email" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number</label>
+                        <input type="text" name="phone" value="{{ form.phone.value|default:'' }}" id="id_phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_license_number">Driving License Number</label>
+                        <input type="text" name="license_number" value="{{ form.license_number.value|default:'' }}" id="id_license_number" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_address">Address Details</label>
+                    <textarea name="address" id="id_address" rows="3" required>{{ form.address.value|default:'' }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId, buttonElement) {
+        // Hide all tab contents
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => content.classList.remove('active'));
+
+        // Deactivate all tab buttons
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // Show targets
+        document.getElementById(tabId).classList.add('active');
+        buttonElement.classList.add('active');
+    }
+</script>
+{% endblock %}

@@ -1,254 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Customers - Car Rental System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            background-color: #333;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .navbar h1 {
-            color: white;
-            font-size: 24px;
-        }
-        .navbar-links {
-            display: flex;
-            gap: 20px;
-        }
-        .navbar-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }
-        .navbar-links a:hover {
-            background-color: #555;
-        }
-        .navbar-links a.active {
-            background-color: #007bff;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .card h3 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        .btn-warning {
-            background-color: #ffc107;
-            color: #333;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        .inline-form {
-            display: inline;
-            margin: 0;
-        }
-        .messages {
-            margin-bottom: 20px;
-        }
-        .message {
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar">
-        <h1>🚗 Car Rental System</h1>
-        <div class="navbar-links">
-            <a href="{% url 'dashboard_url' %}">Dashboard</a>
-            <a href="{% url 'car_list_url' %}">Cars</a>
-            <a href="{% url 'customer_admin_url' %}" class="active">Customers</a>
-            <a href="{% url 'car_admin_url' %}">Manage Cars</a>
-            <a href="{% url 'rental_admin_url' %}">Rentals</a>
-            <a href="{% url 'logout_url' %}">Logout</a>
-        </div>
-    </nav>
-    
-    <div class="container">
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <h2>Manage Customers</h2>
-        
-        <!-- Add Customer Form -->
-        <div class="card">
-            <h3>Add New Customer</h3>
-            <form method="POST">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="text" id="phone" name="phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="license_number">License Number</label>
-                        <input type="text" id="license_number" name="license_number" required>
-                    </div>
+{% extends "base.html" %}
+
+{% block title %}Manage Customers - Car Rental System{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 32px;">
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-weight: 800; font-size: 32px;">Manage Registered Customers</h1>
+        <p style="color: var(--text-secondary);">Manage customer profile records, view license registrations, or register offline customers.</p>
+    </div>
+
+    <!-- Create Customer Form -->
+    <div class="card" style="box-shadow: var(--shadow-md); margin-bottom: 40px;">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 24px; color: var(--text-primary); border-bottom: 1px solid var(--border); padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            👤 Add New Customer Record
+        </h3>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g. Samuel Ayele" required>
                 </div>
                 <div class="form-group">
-                    <label for="address">Address</label>
-                    <textarea id="address" name="address" required></textarea>
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="e.g. samuel@example.com" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Customer</button>
-            </form>
-        </div>
-        
-        <!-- Customer List -->
-        <div class="card">
-            <h3>All Customers</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>License #</th>
-                        <th>Registered</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for customer in customers %}
-                    <tr>
-                        <td>{{ customer.name }}</td>
-                        <td>{{ customer.email }}</td>
-                        <td>{{ customer.phone }}</td>
-                        <td>{{ customer.license_number }}</td>
-                        <td>{{ customer.date_registered|date:"M d, Y" }}</td>
-                        <td class="actions">
-                            <a href="{% url 'customer_edit_url' customer.id %}" class="btn btn-warning">Edit</a>
-                            <form method="POST" action="{% url 'customer_delete_url' customer.id %}" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this customer?')">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" style="text-align: center; color: #666;">No customers yet</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" id="phone" name="phone" placeholder="e.g. +251 911..." required>
+                </div>
+                <div class="form-group">
+                    <label for="license_number">Driving License Number</label>
+                    <input type="text" id="license_number" name="license_number" placeholder="e.g. DL-12345-67" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Residential Address</label>
+                <textarea id="address" name="address" rows="3" placeholder="Enter physical home/work address..." required></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                <button type="submit" class="btn btn-primary" style="min-width: 180px;">Save Customer Profile</button>
+            </div>
+        </form>
     </div>
-</body>
-</html>
+
+    <!-- Customer Database Table -->
+    <div class="card" style="box-shadow: var(--shadow-md);">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px;">Customer Database Registry ({{ customers|length }} Records)</h3>
+        
+        {% if customers %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Phone Number</th>
+                            <th>Driving License #</th>
+                            <th>Registration Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                            <tr>
+                                <td style="font-weight: 700; color: var(--text-primary);">{{ customer.name }}</td>
+                                <td>{{ customer.email }}</td>
+                                <td>{{ customer.phone }}</td>
+                                <td style="font-family: monospace; font-weight: 600; font-size: 14px;">{{ customer.license_number }}</td>
+                                <td>{{ customer.date_registered|date:"M d, Y" }}</td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <a href="{% url 'customer_edit_url' customer.id %}" class="btn btn-warning" style="padding: 6px 12px; font-size: 12px;">Edit</a>
+                                        <form method="POST" action="{% url 'customer_delete_url' customer.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this customer profile?')">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <p>No customer profiles found in the registry.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

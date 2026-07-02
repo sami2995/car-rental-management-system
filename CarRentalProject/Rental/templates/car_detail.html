@@ -1,413 +1,165 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ car.brand }} {{ car.model }} - Car Rental System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% block title %}{{ car.brand }} {{ car.model }} - Car Rental System{% endblock %}
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
+{% block content %}
+<div class="container" style="padding-top: 32px;">
+    <!-- Back Navigation Link -->
+    <div style="margin-bottom: 24px;">
+        <a href="{% url 'car_list_url' %}#cars-section" style="color: var(--primary); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+            ← Back to Fleet
+        </a>
+    </div>
 
-        .navbar {
-            background-color: #333;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar h1 {
-            color: white;
-            font-size: 24px;
-        }
-
-        .navbar-links a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-        }
-
-        .navbar-links a:hover {
-            background-color: #555;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .back-link {
-            display: inline-block;
-            color: #007bff;
-            text-decoration: none;
-            margin-bottom: 20px;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        .car-detail {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .car-image {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            background-color: #e9ecef;
-        }
-
-        .car-image-placeholder {
-            width: 100%;
-            height: 400px;
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 100px;
-        }
-
-        .car-content {
-            padding: 30px;
-        }
-
-        .car-content h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .detail-item {
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-
-        .detail-item label {
-            display: block;
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .detail-item span {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .price-box {
-            background-color: #007bff;
-            color: white;
-            padding: 25px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .price-box .price {
-            font-size: 48px;
-            font-weight: bold;
-        }
-
-        .price-box span {
-            font-size: 18px;
-        }
-
-        .availability {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 4px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .availability.available {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .availability.unavailable {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Reviews Section Styling */
-        .reviews-section {
-            margin-top: 40px;
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .reviews-section h3 {
-            margin-bottom: 20px;
-            color: #333;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
-
-        .review-card {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-
-        .review-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .review-header strong {
-            color: #333;
-            font-size: 16px;
-        }
-
-        .stars {
-            color: #ffc107;
-            font-size: 18px;
-        }
-
-        .review-form {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-
-        .review-form .form-group {
-            margin-bottom: 15px;
-        }
-
-        .review-form label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        .review-form select,
-        .review-form textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .review-form textarea {
-            height: 100px;
-            resize: vertical;
-        }
-
-        .review-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .review-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .messages {
-            list-style: none;
-            margin-bottom: 20px;
-        }
-
-        .messages li {
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        .messages .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .messages .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
-</head>
-
-<body>
-    <nav class="navbar">
-        <h1>🚗 Car Rental System</h1>
-        <div class="navbar-links">
-            <a href="{% url 'car_list_url' %}">Home</a>
-            <a href="{% url 'car_list_url' %}#cars-section">Cars</a>
-            <a href="{% url 'car_list_url' %}#about">About</a>
-            <a href="{% url 'car_list_url' %}#contact">Contact</a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'dashboard_url' %}">Dashboard</a>
-            <a href="{% url 'logout_url' %}">Logout</a>
+    <!-- Main Detail Layout -->
+    <div class="card" style="padding: 0; overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+        
+        <!-- Left Side: Image Gallery -->
+        <div style="background-color: #f1f5f9; min-height: 360px; height: 100%;">
+            {% if car.image %}
+                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" style="width: 100%; height: 100%; object-fit: cover;">
             {% else %}
-            <a href="{% url 'login_url' %}">Login</a>
-            <a href="{% url 'signup_url' %}">Sign Up</a>
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 100px; background: linear-gradient(135deg, #e2e8f0, #cbd5e1);">
+                    🚗
+                </div>
             {% endif %}
         </div>
-    </nav>
 
-    <div class="container">
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li class="{{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+        <!-- Right Side: Details & Action -->
+        <div style="padding: 40px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <!-- Brand & Model -->
+                <h1 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">
+                    {{ car.brand }} {{ car.model }}
+                </h1>
 
-        <a href="{% url 'car_list_url' %}" class="back-link">← Back to Cars</a>
-
-        <div class="car-detail">
-            {% if car.image %}
-            <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" class="car-image">
-            {% else %}
-            <div class="car-image-placeholder">🚗</div>
-            {% endif %}
-
-            <div class="car-content">
-                <h2>{{ car.brand }} {{ car.model }}</h2>
-
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <label>Year</label>
-                        <span>{{ car.year }}</span>
+                <!-- Stars & Average Rating -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
+                    <div class="stars" style="font-size: 16px;">
+                        {% for i in car.star_range %}⭐{% endfor %}
                     </div>
-                    <div class="detail-item">
-                        <label>Color</label>
-                        <span>{{ car.color }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Transmission</label>
-                        <span>{{ car.get_transmission_display }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Plate Number</label>
-                        <span>{{ car.plate_number }}</span>
-                    </div>
+                    <span style="font-size: 14px; font-weight: 700; color: var(--text-secondary);">
+                        {{ car.average_rating }} / 5.0 Rating
+                    </span>
+                    <span style="color: var(--text-muted); font-size: 14px;">|</span>
+                    <span style="font-size: 14px; font-weight: 600; color: var(--primary);">
+                        {{ reviews|length }} Reviews
+                    </span>
                 </div>
 
-                <div class="price-box">
-                    <div class="price">ETB{{ car.daily_rate }}</div>
-                    <span>per day</span>
+                <!-- Specs Grid -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px;">
+                    <div style="background-color: var(--background); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <span style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Year</span>
+                        <span style="font-size: 16px; font-weight: 700; color: var(--text-primary);">{{ car.year }}</span>
+                    </div>
+                    <div style="background-color: var(--background); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <span style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Transmission</span>
+                        <span style="font-size: 16px; font-weight: 700; color: var(--text-primary);">{{ car.get_transmission_display }}</span>
+                    </div>
+                    <div style="background-color: var(--background); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <span style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Color</span>
+                        <span style="font-size: 16px; font-weight: 700; color: var(--text-primary);">{{ car.color }}</span>
+                    </div>
+                    <div style="background-color: var(--background); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <span style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Plate Number</span>
+                        <span style="font-size: 16px; font-weight: 700; color: var(--text-primary);">{{ car.plate_number }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Box & Call To Action -->
+            <div>
+                <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px;">
+                    <span style="font-size: 36px; font-weight: 800; color: var(--primary);">ETB {{ car.daily_rate }}</span>
+                    <span style="color: var(--text-secondary); font-weight: 500;">/ day rate</span>
                 </div>
 
-                {# determine availability based on both the flag and active rentals #}
-                <div
-                    class="availability {% if car.available and not car.is_currently_rented %}available{% else %}unavailable{% endif %}">
-                    {% if car.available and not car.is_currently_rented %}
-                    This car is available for rent
-                    {% else %}
-                    This car is currently not available
+                <!-- Availability Alert block -->
+                {% if car.available and not car.is_currently_rented %}
+                    <div style="background-color: var(--success-light); color: var(--success-text); padding: 16px; border-radius: var(--radius-md); font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                        🟢 This vehicle is currently available for rent.
+                    </div>
+                    
+                    {% if user.is_authenticated and not user.is_staff %}
+                        <a href="{% url 'rent_car_url' car.id %}" class="btn btn-primary" style="width: 100%; padding: 14px 20px; font-size: 16px;">Rent Vehicle Now</a>
+                    {% elif not user.is_authenticated %}
+                        <div style="text-align: center; margin-top: 12px;">
+                            <p style="font-size: 14px; color: var(--text-secondary);">
+                                Please <a href="{% url 'login_url' %}" style="color: var(--primary); font-weight: 700; text-decoration: none;">login</a> or <a href="{% url 'signup_url' %}" style="color: var(--primary); font-weight: 700; text-decoration: none;">sign up</a> to complete booking.
+                            </p>
+                        </div>
                     {% endif %}
-                </div>
-
-                {% if user.is_authenticated and not user.is_staff and car.available and not car.is_currently_rented %}
-                <a href="{% url 'rent_car_url' car.id %}" class="btn">Rent Now</a>
-                {% elif not user.is_authenticated %}
-                <p style="margin-top:20px; text-align:center;">Please <a href="{% url 'login_url' %}">login</a> or <a
-                        href="{% url 'signup_url' %}">sign up</a> to rent this car.</p>
+                {% else %}
+                    <div style="background-color: var(--error-light); color: var(--error-text); padding: 16px; border-radius: var(--radius-md); font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                        🔴 This vehicle is currently booked or unavailable.
+                    </div>
                 {% endif %}
             </div>
         </div>
+    </div>
 
-        <!-- Reviews Section -->
-        <div class="reviews-section">
-            <h3>Customer Reviews</h3>
+    <!-- Reviews Section -->
+    <div class="card" id="review" style="margin-top: 40px; border-radius: var(--radius-md); box-shadow: var(--shadow-md);">
+        <h2 class="card-title" style="margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+            💬 Customer Reviews ({{ reviews|length }})
+        </h2>
 
-            {% if reviews %}
-            {% for review in reviews %}
-            <div class="review-card">
-                <div class="review-header">
-                    <span><strong>{{ review.customer.name }}</strong> on {{ review.date_created|date:"M d, Y" }}</span>
-                    <span class="stars">
-                        {% if review.rating == 5 %}⭐⭐⭐⭐⭐{% endif %}
-                        {% if review.rating == 4 %}⭐⭐⭐⭐{% endif %}
-                        {% if review.rating == 3 %}⭐⭐⭐{% endif %}
-                        {% if review.rating == 2 %}⭐⭐{% endif %}
-                        {% if review.rating == 1 %}⭐{% endif %}
-                    </span>
-                </div>
-                <p>{{ review.comment }}</p>
+        {% if reviews %}
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for review in reviews %}
+                    <div style="background-color: var(--background); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; transition: all 0.2s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div>
+                                <span style="font-weight: 700; color: var(--text-primary); font-size: 15px;">{{ review.customer.name }}</span>
+                                <span style="color: var(--text-muted); font-size: 12px; margin-left: 8px;">{{ review.date_created|date:"F d, Y" }}</span>
+                            </div>
+                            <div class="stars">
+                                {% if review.rating == 5 %}⭐⭐⭐⭐⭐{% endif %}
+                                {% if review.rating == 4 %}⭐⭐⭐⭐{% endif %}
+                                {% if review.rating == 3 %}⭐⭐⭐{% endif %}
+                                {% if review.rating == 2 %}⭐⭐{% endif %}
+                                {% if review.rating == 1 %}⭐{% endif %}
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">{{ review.comment }}</p>
+                    </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-            {% else %}
-            <p>No reviews yet. Be the first to review this car!</p>
-            {% endif %}
+        {% else %}
+            <div style="text-align: center; padding: 40px 16px; color: var(--text-secondary);">
+                <p style="font-size: 16px; margin-bottom: 12px;">No reviews yet for this vehicle.</p>
+                <p style="font-size: 14px; color: var(--text-muted);">Have you driven this car? Share your experience with other users!</p>
+            </div>
+        {% endif %}
 
-            <!-- Review Form -->
-            {% if can_review %}
-            <div class="review-form">
-                <h4>Leave a Review</h4>
+        <!-- Review Form -->
+        {% if can_review %}
+            <div style="margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border);">
+                <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: var(--text-primary);">Write a Review</h3>
                 <form method="POST" action="{% url 'car_detail_url' car.id %}">
                     {% csrf_token %}
-                    {% if form.non_field_errors %}
-                    <ul class="messages">
-                        {% for error in form.non_field_errors %}
-                        <li class="error">{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% endif %}
-                    <div class="form-group">
-                        <label for="rating">Rating (1-5)</label>
+                    
+                    <div class="form-group" style="max-width: 240px;">
+                        <label for="rating">Rating Score</label>
                         <select name="rating" id="rating" required>
-                            <option value="5" {% if form.data.rating == '5' %}selected{% endif %}>5 - Excellent</option>
-                            <option value="4" {% if form.data.rating == '4' %}selected{% endif %}>4 - Good</option>
-                            <option value="3" {% if form.data.rating == '3' %}selected{% endif %}>3 - Average</option>
-                            <option value="2" {% if form.data.rating == '2' %}selected{% endif %}>2 - Poor</option>
-                            <option value="1" {% if form.data.rating == '1' %}selected{% endif %}>1 - Terrible</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
+                            <option value="3">⭐⭐⭐ 3 - Average</option>
+                            <option value="2">⭐⭐ 2 - Poor</option>
+                            <option value="1">⭐ 1 - Terrible</option>
                         </select>
-                        {% for error in form.rating.errors %}
-                        <p style="color:#dc3545;margin-top:6px;">{{ error }}</p>
-                        {% endfor %}
                     </div>
+
                     <div class="form-group">
                         <label for="comment">Your Comment</label>
-                        <textarea name="comment" id="comment" required
-                            placeholder="Share your experience with this car...">{{ form.data.comment|default:'' }}</textarea>
-                        {% for error in form.comment.errors %}
-                        <p style="color:#dc3545;margin-top:6px;">{{ error }}</p>
-                        {% endfor %}
+                        <textarea name="comment" id="comment" required rows="4" placeholder="Share specific details about this car's performance, comfort, and cleanliness..."></textarea>
                     </div>
-                    <button type="submit" class="review-btn">Submit Review</button>
+
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
                 </form>
             </div>
-            {% elif not user.is_authenticated %}
-            <p style="margin-top: 20px;"><a href="{% url 'login_url' %}">Log in</a> to leave a review.</p>
-            {% endif %}
-        </div>
+        {% endif %}
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}
